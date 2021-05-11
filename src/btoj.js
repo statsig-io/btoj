@@ -1,9 +1,11 @@
+#!/usr/bin/env node
+
 const fs = require("fs");
 const { exit } = require("process");
 
-fs.readFile("./binary.bin", "latin1", (e, d) => {
-  if (e) {
-    console.error(e);
+fs.readFile("./binary.bin", "latin1", (re, d) => {
+  if (re) {
+    console.error(re);
     exit(1);
   }
 
@@ -22,11 +24,16 @@ fs.readFile("./binary.bin", "latin1", (e, d) => {
     `const data = Buffer.from("${data}", "latin1");
 module.exports = data;
 `,
-    (e) => {
-      if (e) {
-        console.error(e);
+
+    (we) => {
+      if (we) {
+        console.error(we);
         exit(1);
       }
+
+      console.info(
+        `Generated binary.js\nYou can now delete binary.bin from your project. The js file is all you need.`
+      );
     }
   );
 });

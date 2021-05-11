@@ -3,10 +3,19 @@
   "version": "1.0.0",
   "description": "btoj (Binary to JavaScript) is a utility that converts binary files into pure JavaScript modules exporting those files as Node.js Buffers.",
   "main": "src/btoj.js",
+  "engines": {
+    "node": ">= 6.0.0"
+  },
   "files": [
     "/src",
     "/types"
   ],
+  "bin": {
+    "btoj": "./src/btoj.js"
+  },
+  "scripts": {
+    "btoj": "node src/btoj.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/statsig-io/btoj.git"
