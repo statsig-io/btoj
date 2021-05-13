@@ -1,9 +1,30 @@
 #!/usr/bin/env node
 
+const yargs = require("yargs");
 const fs = require("fs");
 const { exit } = require("process");
 
-fs.readFile("./binary.bin", "latin1", (re, d) => {
+const argv = yargs
+  .usage(
+    `Usage:
+  $ btoj someInput.bin -o binary.js`
+  )
+  .option("output", {
+    alias: "o",
+    description: "Path to the output js module.",
+    required: true,
+    type: "string",
+  })
+  .help()
+  .alias("help", "h").argv;
+
+const inputPath = argv._[0];
+if (!inputPath) {
+  yargs.showHelp();
+  exit(1);
+}
+
+fs.readFile(inputPath, "latin1", (re, d) => {
   if (re) {
     console.error(re);
     exit(1);
@@ -20,7 +41,7 @@ fs.readFile("./binary.bin", "latin1", (re, d) => {
     .replaceAll("\n", "\\n");
 
   fs.writeFile(
-    "./binary.js",
+    argv.output,
     `const data = Buffer.from("${data}", "latin1");
 module.exports = data;
 `,
@@ -32,7 +53,7 @@ module.exports = data;
       }
 
       console.info(
-        `Generated binary.js\nYou can now delete binary.bin from your project. The js file is all you need.`
+        `Generated '${argv.output}'\nYou can now delete '${inputPath}' from your project. The js file is all you need.`
       );
     }
   );

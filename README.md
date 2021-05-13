@@ -6,9 +6,9 @@
 
 ```console
 $ npm install --global btoj
-$ btoj location_data.bin
-generated location_data.js
-You can now delete location_data.bin from your project. The js file is all you need.
+$ btoj location_data.bin -o location_data.js
+generated 'location_data.js'
+You can now delete 'location_data.bin' from your project. The js file is all you need.
 ```
 
 ```js
@@ -19,7 +19,13 @@ import location_data from "location_data";
 // const buffer = await fs.readFile(
 //      path.resolve("./location_data.bin")
 // );
+//
+// Note that the binary file is no longer needed--the js module has its data.
 ```
+
+## Compatibility
+
+**btoj** is tested in Unix and OSX environments. It likely does not work on Windows yet, but feel free to send a PR.
 
 ## Why?
 
