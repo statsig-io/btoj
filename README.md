@@ -17,7 +17,7 @@ import location_data from "location_data";
 // `location_data` will hold the same Buffer as if you had done
 //
 // const buffer = await fs.readFile(
-//      path.resolve("./location_data.bin")
+//   path.resolve("./location_data.bin")
 // );
 //
 // Note that the binary file is no longer needed--the js module has its data.
