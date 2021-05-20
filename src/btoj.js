@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
+const encodings = ['latin1', 'utf16le', 'ucs2', 'utf8', 'ascii', 'base64', 'base64url', 'hex'];
 const yargs = require("yargs");
+const path = require("path");
 const fs = require("fs");
 const { exit } = require("process");
 
@@ -19,6 +21,12 @@ const argv = yargs
     required: true,
     type: "string",
   })
+  .option("staging", {
+    alias: "s",
+    description: "Path to the staging directory, used to measure size of different encodings.  Defaults to `.btoj/`",
+    required: false,
+    type: "string",
+  })
   .help()
   .alias("help", "h").argv;
 
@@ -28,14 +36,21 @@ if (!inputPath) {
   exit(1);
 }
 
-fs.readFile(inputPath, "latin1", (re, d) => {
-  if (re) {
-    console.error(re);
-    exit(1);
-  }
+const stagingDir = path.resolve(argv.staging ?? '.btoj/');
+if (fs.existsSync(stagingDir)){
+  console.error(`Staging directory '${stagingDir}' already exists.  Aborting.`);
+  exit(1);
+}
 
+fs.mkdirSync(stagingDir);
+
+const data = fs.readFileSync(inputPath);
+const possibleEncodings = {};
+for (const e of encodings) {
+  const encodedFile = path.resolve(stagingDir, `${e}.js`);
+  const d = fs.readFileSync(inputPath, e);
   const delimiter = getDelimiter(d);
-  const data = d
+  const encoded = d
     .replaceAll("\\", "\\\\")
     .replaceAll(delimiter, `\\${delimiter}`)
     .replaceAll("\r", "\\r")
@@ -45,18 +60,30 @@ fs.readFile(inputPath, "latin1", (re, d) => {
     .replaceAll("\t", "\\t")
     .replaceAll("\n", "\\n");
 
-  fs.writeFile(
-    argv.output,
-    `module.exports = Buffer.from(${delimiter}${data}${delimiter}, ${delimiter}latin1${delimiter});\n`,
-    (we) => {
-      if (we) {
-        console.error(we);
-        exit(1);
-      }
-
-      console.info(
-        `Generated '${argv.output}'\nYou can now delete '${inputPath}' from your project. The js file is all you need.`
-      );
-    }
+  fs.writeFileSync(
+    encodedFile,
+    `module.exports = Buffer.from(${delimiter}${encoded}${delimiter}, ${delimiter}${e}${delimiter});\n`
   );
-});
+
+  try {
+    if (Buffer.compare(require(encodedFile), data) === 0) {
+      possibleEncodings[e] = fs.statSync(encodedFile).size;
+    }
+  } catch (e) {}
+}
+
+let bestEncoding;
+let bestSize = Number.MAX_VALUE;
+for (let e of encodings) {
+  if (possibleEncodings[e] < bestSize) {
+    bestEncoding = e;
+    bestSize = possibleEncodings[e];
+  }
+}
+
+fs.copyFileSync(path.resolve(stagingDir, `${bestEncoding}.js`), path.resolve(argv.output));
+fs.rmSync(stagingDir, { recursive: true, force: true });
+
+console.info(
+  `Generated '${argv.output}'.  You can remove '${inputPath}' from your project, the .js file is all you need.`
+);
