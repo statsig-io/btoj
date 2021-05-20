@@ -4,6 +4,10 @@ const yargs = require("yargs");
 const fs = require("fs");
 const { exit } = require("process");
 
+function getDelimiter(s) {
+  return (s.match(/\'/g)||[]).length >= (s.match(/\"/g)||[]).length ? '"' : "'";
+}
+
 const argv = yargs
   .usage(
     `Usage:
@@ -30,9 +34,10 @@ fs.readFile(inputPath, "latin1", (re, d) => {
     exit(1);
   }
 
+  const delimiter = getDelimiter(d);
   const data = d
     .replaceAll("\\", "\\\\")
-    .replaceAll('"', '\\"')
+    .replaceAll(delimiter, `\\${delimiter}`)
     .replaceAll("\r", "\\r")
     .replaceAll("\b", "\\b")
     .replaceAll("\f", "\\f")
@@ -42,10 +47,7 @@ fs.readFile(inputPath, "latin1", (re, d) => {
 
   fs.writeFile(
     argv.output,
-    `const data = Buffer.from("${data}", "latin1");
-module.exports = data;
-`,
-
+    `module.exports = Buffer.from(${delimiter}${data}${delimiter}, ${delimiter}latin1${delimiter});\n`,
     (we) => {
       if (we) {
         console.error(we);
