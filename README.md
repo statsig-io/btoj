@@ -1,12 +1,12 @@
 # **btoj**
 
-**btoj** (Binary to JavaScript) is a utility that converts binary files into pure JavaScript modules exporting those files as Node.js Buffers.
+**btoj** (Binary to JavaScript) is a utility that converts binary files into pure JavaScript modules exporting those files as Buffers.
 
 ## Usage
 
 ```console
 $ npm install --global btoj
-$ btoj location_data.bin -o location_data.js
+$ btoj location_data.bin -o location_data.js [--compress]
 generated 'location_data.js'
 You can now delete 'location_data.bin' from your project. The js file is all you need.
 ```
@@ -25,7 +25,13 @@ import location_data from "location_data";
 
 ## Compatibility
 
-**btoj** is tested in Unix and OSX environments. It likely does not work on Windows yet, but feel free to send a PR.
+**btoj** is likely compatible with your system. If not, send a PR!
+
+Compression currently requires [NodeJS's `zlib` library](https://nodejs.org/api/zlib.html#zlib_zlib_brotlicompresssync_buffer_options) and won't work on browser environments.
+
+## Benchmarks
+
+TODO!
 
 ## Why?
 
