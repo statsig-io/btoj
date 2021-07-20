@@ -1,15 +1,6 @@
 #!/usr/bin/env node
 
-const encodings = [
-  "latin1",
-  "utf16le",
-  "ucs2",
-  "utf8",
-  "ascii",
-  "base64",
-  "base64url",
-  "hex",
-];
+const encodings = ["latin1", "utf8", "base64", "utf16le", "ucs2", "ascii"];
 
 const yargs = require("yargs");
 const path = require("path");
@@ -86,10 +77,6 @@ for (const e of encodings) {
     .replaceAll("\\", "\\\\")
     .replaceAll(d, `\\${d}`)
     .replaceAll("\r", "\\r")
-    .replaceAll("\b", "\\b")
-    .replaceAll("\f", "\\f")
-    .replaceAll("\v", "\\v")
-    .replaceAll("\t", "\\t")
     .replaceAll("\n", "\\n");
 
   let out = "";
@@ -109,14 +96,14 @@ for (const e of encodings) {
   try {
     if (Buffer.compare(require(outFile), input) === 0) {
       const size = fs.statSync(outFile).size;
-      console.debug(`  Encoding '${e}' requires ${size} bytes.`);
+      console.debug(`  '${e}'\trequires ${size} bytes.`);
       possibleEncodings[e] = size;
     } else {
-      console.debug(`  Encoding '${e}' would cause corruption.`);
+      console.debug(`  '${e}'\twould cause corruption.`);
       possibleEncodings[e] = Number.MAX_VALUE;
     }
   } catch (ex) {
-    console.debug(`  Encoding '${e}' fails due to ${ex.code}`);
+    console.debug(`  '${e}'\tfails with '${ex.code ?? "ERR_INVALID_JS"}'`);
   }
 }
 
