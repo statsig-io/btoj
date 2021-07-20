@@ -77,8 +77,12 @@ for (const e of encodings) {
     encodedInput = fs.readFileSync(inputPath, e);
   }
 
+  if (e.startsWith("base64")) {
+    encodedInput = encodedInput.replaceAll("=", "");
+  }
+
   const d = getDelimiter(encodedInput);
-  const encoded = encodedInput
+  const escaped = encodedInput
     .replaceAll("\\", "\\\\")
     .replaceAll(d, `\\${d}`)
     .replaceAll("\r", "\\r")
@@ -93,18 +97,18 @@ for (const e of encodings) {
     out += `let z=require(${d}zlib${d});`;
   }
 
-  let hardcodedData = `Buffer.from(${d}${encoded}${d}, ${d}${e}${d})`;
+  let hardcodedData = `Buffer.from(${d}${escaped}${d}, ${d}${e}${d})`;
   if (argv.compress) {
     hardcodedData = `z.brotliDecompressSync(${hardcodedData})`;
   }
 
   out += `module.exports=${hardcodedData};\n`;
 
-  const encodedOutFile = path.resolve(stagingDir, `${e}.js`);
-  fs.writeFileSync(encodedOutFile, out);
+  const outFile = path.resolve(stagingDir, `${e}.js`);
+  fs.writeFileSync(outFile, out);
   try {
-    if (Buffer.compare(require(encodedOutFile), input) === 0) {
-      const size = fs.statSync(encodedOutFile).size;
+    if (Buffer.compare(require(outFile), input) === 0) {
+      const size = fs.statSync(outFile).size;
       console.debug(`  Encoding '${e}' requires ${size} bytes.`);
       possibleEncodings[e] = size;
     } else {
